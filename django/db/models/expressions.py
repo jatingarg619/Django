@@ -326,6 +326,16 @@ class BaseExpression:
             if not self._output_field_resolved_to_none:
                 raise
 
+    def is_nullable(self, nullable_aliases):
+        return any(
+            expr.is_nullable(nullable_aliases) for expr in self.get_source_expressions()
+        )
+
+    def exclude_nulls(self, nullable_aliases):
+        if self.is_nullable(nullable_aliases):
+            return [self.output_field.get_lookup("isnull")(self, False)]
+        return []
+
     def _resolve_output_field(self):
         """
         Attempt to infer the output type of the expression.
@@ -1178,6 +1188,9 @@ class Value(SQLiteNumericMixin, Expression):
     def empty_result_set_value(self):
         return self.value
 
+    def is_nullable(self, nullable_aliases):
+        return self.output_field.nullable
+
 
 class RawSQL(Expression):
     allowed_default = True
@@ -1266,6 +1279,9 @@ class Col(Expression):
         return self.output_field.get_db_converters(
             connection
         ) + self.target.get_db_converters(connection)
+
+    def is_nullable(self, nullable_aliases):
+        return self.alias in nullable_aliases or self.target.nullable
 
 
 class Ref(Expression):
