@@ -14,6 +14,7 @@ from django.db.models.lookups import (
 class MultiColSource:
     contains_aggregate = False
     contains_over_clause = False
+    constrains_nulls = False
 
     def __init__(self, alias, targets, sources, field):
         self.targets, self.sources, self.field, self.alias = (
