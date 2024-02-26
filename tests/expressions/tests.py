@@ -50,6 +50,7 @@ from django.db.models.expressions import (
     Combinable,
     CombinedExpression,
     NegatedExpression,
+    OutputFieldIsNoneError,
     RawSQL,
     Ref,
 )
@@ -2313,6 +2314,23 @@ class ValueTests(TestCase):
         Time.objects.create()
         time = Time.objects.annotate(one=Value(1, output_field=DecimalField())).first()
         self.assertEqual(time.one, 1)
+
+    def test_output_field_is_none_error(self):
+        with self.assertRaises(OutputFieldIsNoneError):
+            Employee.objects.annotate(custom_expression=Value(None)).values_list(
+                "custom_expression", flat=True
+            ).first()
+
+    def test_output_field_or_none_property(self):
+        for output_field in (None, IntegerField()):
+            with self.subTest(output_field=output_field):
+                expression = Value(None, output_field=output_field)
+                if output_field is None:
+                    self.assertIsNone(expression._output_field_or_none)
+                else:
+                    self.assertIsInstance(
+                        expression._output_field_or_none, IntegerField
+                    )
 
     def test_resolve_output_field(self):
         value_types = [
