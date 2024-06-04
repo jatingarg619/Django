@@ -661,14 +661,18 @@ class UniqueConstraint(BaseConstraint):
                 if self.violation_error_message == self.default_violation_error_message:
                     # When fields are defined, use the unique_error_message() as
                     # a default for backward compatibility.
-                    validation_error_message = instance.unique_error_message(model, self.fields)
+                    validation_error_message = instance.unique_error_message(
+                        model, self.fields
+                    )
                     violation_error_code = validation_error_message.code
                 else:
                     validation_error_message = self.get_violation_error_message()
                     violation_error_code = self.violation_error_code
                 raise ValidationError(
-                    validation_error_message, code=violation_error_code,
+                    validation_error_message, 
+                    code=violation_error_code,
                 )
+        
         else:
             against = instance._get_field_value_map(meta=model._meta, exclude=exclude)
             try:
