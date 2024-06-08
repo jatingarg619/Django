@@ -52,7 +52,6 @@ code and create a new directory named ``djangotutorial``.
 
 .. console::
 
-
    $ mkdir djangotutorial
 
 Then, run the following command to bootstrap a new Django project:
@@ -75,7 +74,6 @@ directory. If it didn't work, see :ref:`troubleshooting-django-admin`.
 Let's look at what :djadmin:`startproject` created:
 
 .. code-block:: text
-
 
     djangotutorial/
         manage.py
