@@ -185,6 +185,7 @@ rather than creating directories.
     configuration and apps for a particular website. A project can contain
     multiple apps. An app can be in multiple projects.
 
+
 Your apps can live anywhere in your :ref:`Python path <tut-searchpath>`. In
 this tutorial, we'll create our poll app in the :file:`djangotutorial` folder.
 
