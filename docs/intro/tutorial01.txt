@@ -60,8 +60,8 @@ Then, run the following command to bootstrap a new Django project:
 
    $ django-admin startproject mysite djangotutorial
 
-This will create a ``mysite`` directory inside the ``djangotutorial``
-directory. If it didn't work, see :ref:`troubleshooting-django-admin`.
+This will create your project in the ``djangotutorial`` directory. If it didn't
+work, see :ref:`troubleshooting-django-admin`.
 
 .. note::
 
