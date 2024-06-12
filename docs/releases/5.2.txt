@@ -257,6 +257,8 @@ PostgreSQL 14 and higher.
 Miscellaneous
 -------------
 
+* ...
+
 .. _deprecated-features-5.2:
 
 Features deprecated in 5.2
