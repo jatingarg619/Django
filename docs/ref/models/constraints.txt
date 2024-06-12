@@ -283,7 +283,11 @@ PostgreSQL 15+.
 .. attribute:: UniqueConstraint.violation_error_code
 
 The error code used when ``ValidationError`` is raised during
-:ref:`model validation <validating-objects>`. Defaults to ``None``.
+:ref:`model validation <validating-objects>`. The error code of such :class:`~UniqueConstraint`\s 
+will then be different from :attr:`.Field.unique` or in
+:attr:`Meta.unique_together <django.db.models.Options.unique_together>` if a custom 
+violation_error_code is set. Defaults to
+:attr:`.BaseConstraint.violation_error_message`.
 
 .. versionchanged:: 5.2
 
@@ -300,7 +304,10 @@ violation_error_code is set.
 .. attribute:: UniqueConstraint.violation_error_message
 
 The error message used when ``ValidationError`` is raised during
-:ref:`model validation <validating-objects>`. Defaults to
+:ref:`model validation <validating-objects>`. The error message of such 
+:class:`~UniqueConstraint`\s will then be different from constraints defined 
+with :attr:`.Field.unique` or in :attr:`Meta.unique_together 
+<django.db.models.Options.unique_together>`. Defaults to
 :attr:`.BaseConstraint.violation_error_message`.
 
 .. versionchanged:: 5.2
