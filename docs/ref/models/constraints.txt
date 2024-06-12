@@ -310,4 +310,4 @@ This message *is* also used for :class:`UniqueConstraint`\s with
 :attr:`~UniqueConstraint.condition`. The error message of such 
 :class:`~UniqueConstraint`\s will then be different from constraints defined 
 with :attr:`.Field.unique` or in :attr:`Meta.unique_together 
-<django.db.models.Options.constraints>`.
+<django.db.models.Options.unique_together>`.
