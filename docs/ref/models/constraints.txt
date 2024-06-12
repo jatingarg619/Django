@@ -291,7 +291,7 @@ This code *is* also used for :class:`UniqueConstraint`\s with
 :attr:`~UniqueConstraint.fields` and without a
 :attr:`~UniqueConstraint.condition`. The error code of such :class:`~UniqueConstraint`\s 
 will then be different from :attr:`.Field.unique` or in
-:attr:`Meta.unique_together <django.db.models.Options.constraints>` if a custom 
+:attr:`Meta.unique_together <django.db.models.Options.unique_together>` if a custom 
 violation_error_code is set.
 
 ``violation_error_message``
