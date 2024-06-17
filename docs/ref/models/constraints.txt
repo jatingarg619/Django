@@ -282,39 +282,43 @@ PostgreSQL 15+.
 
 .. attribute:: UniqueConstraint.violation_error_code
 
-The error code used when ``ValidationError`` is raised during
-:ref:`model validation <validating-objects>`. The error code of such :class:`~UniqueConstraint`\s 
-will then be different from :attr:`.Field.unique` or in
-:attr:`Meta.unique_together <django.db.models.Options.unique_together>` if a custom 
-violation_error_code is set. Defaults to
-:attr:`.BaseConstraint.violation_error_message`.
+The error code used when a ``ValidationError`` is raised during
+:ref:`model validation <validating-objects>`.
+
+If :attr:`~UniqueConstraint.fields` is set and without a
+:attr:`~UniqueConstraint.condition`, the
+:attr:`~django.db.models.UniqueConstraint.violation_error_code` defaults to the
+same error code as when setting :attr:`.Field.unique` when there is a single
+field, and to the same error code as when setting
+:attr:`Meta.unique_together <django.db.models.Options.unique_together>` when
+there are multiple.
+
+Otherwise, defaults to :attr:`.BaseConstraint.violation_error_message`.
 
 .. versionchanged:: 5.2
 
-This code *is* also used for :class:`UniqueConstraint`\s with
-:attr:`~UniqueConstraint.fields` and without a
-:attr:`~UniqueConstraint.condition`. The error code of such :class:`~UniqueConstraint`\s 
-will then be different from :attr:`.Field.unique` or in
-:attr:`Meta.unique_together <django.db.models.Options.unique_together>` if a custom 
-violation_error_code is set.
+If :attr:`~django.db.models.UniqueConstraint.violation_error_code` is
+set, this code is now always used.
 
 ``violation_error_message``
 ---------------------------
 
 .. attribute:: UniqueConstraint.violation_error_message
 
-The error message used when ``ValidationError`` is raised during
-:ref:`model validation <validating-objects>`. The error message of such 
-:class:`~UniqueConstraint`\s will then be different from constraints defined 
-with :attr:`.Field.unique` or in :attr:`Meta.unique_together 
-<django.db.models.Options.unique_together>`. Defaults to
-:attr:`.BaseConstraint.violation_error_message`.
+The error message used when a ``ValidationError`` is raised during
+:ref:`model validation <validating-objects>`.
+
+If :attr:`~UniqueConstraint.fields` is set and without a
+:attr:`~UniqueConstraint.condition`, the
+:attr:`~django.db.models.UniqueConstraint.violation_error_message` defaults to
+the same error message as when setting :attr:`.Field.unique` when there is a
+single field, and to the same error message as when setting
+:attr:`Meta.unique_together <django.db.models.Options.unique_together>` when
+there are multiple.
+
+Otherwise, defaults to :attr:`.BaseConstraint.violation_error_message`.
 
 .. versionchanged:: 5.2
 
-This message *is* also used for :class:`UniqueConstraint`\s with
-:attr:`~UniqueConstraint.fields` and without a
-:attr:`~UniqueConstraint.condition`. The error message of such 
-:class:`~UniqueConstraint`\s will then be different from constraints defined 
-with :attr:`.Field.unique` or in :attr:`Meta.unique_together 
-<django.db.models.Options.unique_together>`.
+If :attr:`~django.db.models.UniqueConstraint.violation_error_message` is
+set, this message is now always used.
