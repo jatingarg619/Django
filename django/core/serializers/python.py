@@ -99,12 +99,16 @@ class Serializer(base.Serializer):
 class Deserializer:
     """
     Deserialize simple Python objects back into Django ORM instances.
+
     It's expected that you pass the Python objects themselves (instead of a
     stream or a string) to the constructor
     """
-    def __init__(self, object_list, *, using=DEFAULT_DB_ALIAS, ignorenonexistent=False, **options):
+
+    def __init__(
+        self, object_list, *, using=DEFAULT_DB_ALIAS, ignorenonexistent=False, **options
+    ):
         self.object_list = object_list
-        self.handle_forward_references = options.pop('handle_forward_references', False)
+        self.handle_forward_references = options.pop("handle_forward_references", False)
         self.using = using
         self.ignorenonexistent = ignorenonexistent
         self.field_names_cache = {}  # Model: <list of field_names>
@@ -123,20 +127,25 @@ class Deserializer:
                 if self.ignorenonexistent:
                     continue
                 raise
-            if 'pk' in obj:
+            if "pk" in obj:
                 try:
-                    data[Model._meta.pk.attname] = Model._meta.pk.to_python(obj.get('pk'))
+                    data[Model._meta.pk.attname] = Model._meta.pk.to_python(
+                        obj.get("pk")
+                    )
                 except Exception as e:
-                    raise base.DeserializationError.WithData(e, obj['model'], obj.get('pk'), None)
+                    raise base.DeserializationError.WithData(
+                        e, obj["model"], obj.get("pk"), None
+                    )
 
             if self.ignorenonexistent:
                 if Model not in self.field_names_cache:
-                    self.field_names_cache[Model] = {f.name for f in Model._meta.get_fields()}
+                    self.field_names_cache[Model] = {
+                        f.name for f in Model._meta.get_fields()
+                    }
                 field_names = self.field_names_cache[Model]
 
             # Handle each field
-            for (field_name, field_value) in obj["fields"].items():
-
+            for field_name, field_value in obj["fields"].items():
                 if self.ignorenonexistent and field_name not in field_names:
                     # skip fields no longer on model
                     continue
@@ -144,7 +153,9 @@ class Deserializer:
                 field = Model._meta.get_field(field_name)
 
                 # Handle M2M relations
-                if field.remote_field and isinstance(field.remote_field, models.ManyToManyRel):
+                if field.remote_field and isinstance(
+                    field.remote_field, models.ManyToManyRel
+                ):
                     try:
                         values = self._handle_m2m_field(field, field_value)
                         if values == base.DEFER_FIELD:
@@ -152,10 +163,14 @@ class Deserializer:
                         else:
                             m2m_data[field.name] = values
                     except base.M2MDeserializationError as e:
-                        raise base.DeserializationError.WithData(e.original_exc, obj['model'], obj.get('pk'), e.pk)
+                        raise base.DeserializationError.WithData(
+                            e.original_exc, obj["model"], obj.get("pk"), e.pk
+                        )
 
                 # Handle FK fields
-                elif field.remote_field and isinstance(field.remote_field, models.ManyToOneRel):
+                elif field.remote_field and isinstance(
+                    field.remote_field, models.ManyToOneRel
+                ):
                     try:
                         value = self._handle_foreign_key_field(field, field_value)
                         if value == base.DEFER_FIELD:
@@ -163,29 +178,31 @@ class Deserializer:
                         else:
                             data[field.attname] = value
                     except Exception as e:
-                        raise base.DeserializationError.WithData(e, obj['model'], obj.get('pk'), field_value)
+                        raise base.DeserializationError.WithData(
+                            e, obj["model"], obj.get("pk"), field_value
+                        )
 
                 # Handle all other fields
                 else:
                     try:
                         data[field.name] = field.to_python(field_value)
                     except Exception as e:
-                        raise base.DeserializationError.WithData(e, obj['model'], obj.get('pk'), field_value)
+                        raise base.DeserializationError.WithData(
+                            e, obj["model"], obj.get("pk"), field_value
+                        )
 
             model_instance = base.build_instance(Model, data, self.using)
             yield base.DeserializedObject(model_instance, m2m_data, deferred_fields)
 
     def _handle_m2m_field(self, field, field_value):
-        return base.deserialize_m2m_values(field,
-                                           field_value,
-                                           self.using,
-                                           self.handle_forward_references)
+        return base.deserialize_m2m_values(
+            field, field_value, self.using, self.handle_forward_references
+        )
 
     def _handle_foreign_key_field(self, field, field_value):
-        return base.deserialize_fk_value(field,
-                                         field_value,
-                                         self.using,
-                                         self.handle_forward_references)
+        return base.deserialize_fk_value(
+            field, field_value, self.using, self.handle_forward_references
+        )
 
     @staticmethod
     def _get_model(model_identifier):
@@ -194,4 +211,5 @@ class Deserializer:
             return apps.get_model(model_identifier)
         except (LookupError, TypeError):
             raise base.DeserializationError(
-                "Invalid model identifier: '%s'" % model_identifier)
+                f"Invalid model identifier: {model_identifier}"
+            )
