@@ -60,7 +60,8 @@ Then, run the following command to bootstrap a new Django project:
 
    $ django-admin startproject mysite djangotutorial
 
-This will create your project in the ``djangotutorial`` directory. If it didn't
+This will create your project in the ``djangotutorial`` directory.  Its
+  name doesn't matter to Django; you can rename it to anything you like. If it didn't
 work, see :ref:`troubleshooting-django-admin`.
 
 .. note::
@@ -85,9 +86,7 @@ Let's look at what :djadmin:`startproject` created:
 
 These files are:
 
-* :file:`djangotutorial/`: A root directory that contains your project. Its
-  name doesn't matter to Django; you can rename it to anything you like.
-
+* The outer :file:`djangotutorial/` root directory is a container for your project.
 * :file:`manage.py`: A command-line utility that lets you interact with this
   Django project in various ways. You can read all the details about
   :file:`manage.py` in :doc:`/ref/django-admin`.
