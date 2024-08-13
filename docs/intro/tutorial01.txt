@@ -92,7 +92,7 @@ These files are:
   Django project in various ways. You can read all the details about
   :file:`manage.py` in :doc:`/ref/django-admin`.
 
-* :file:`mysite/`: A child directory that is the actual Python package for your
+* :file:`mysite/`: A child directory with the actual Python package for your
   project. Its name is the Python package name you'll need to use to import
   anything inside it (e.g. ``mysite.urls``).
 
@@ -117,8 +117,8 @@ These files are:
 The development server
 ======================
 
-Let's verify your Django project works. Change into the :file:`djangotutorial` directory, if
-you haven't already, and run the following commands:
+Let's verify your Django project works. Change into the :file:`djangotutorial`
+directory, if you haven't already, and run the following commands:
 
 .. console::
 
