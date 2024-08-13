@@ -64,6 +64,7 @@ This will create your project in the ``djangotutorial`` directory.  Its
   name doesn't matter to Django; you can rename it to anything you like. If it didn't
 work, see :ref:`troubleshooting-django-admin`.
 
+
 .. note::
 
     You'll need to avoid naming projects after built-in Python or Django
