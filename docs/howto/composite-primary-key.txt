@@ -144,3 +144,8 @@ composite primary keys are a proxy to multiple fields.
     Count("pk")  -- ERROR
     Count("foo_set__id")  -- OK
     Count("foo_set")  -- ERROR
+
+Composite primary keys and admin
+================================
+
+The admin doesn't support models with composite primary keys at this time.
