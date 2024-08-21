@@ -116,7 +116,7 @@ class AdminSite:
             if model._meta.is_composite_pk():
                 raise ImproperlyConfigured(
                     "The model %s has a composite primary key, so it cannot be "
-                    "registered with admin" % model.__name__
+                    "registered with admin." % model.__name__
                 )
 
             if self.is_registered(model):
