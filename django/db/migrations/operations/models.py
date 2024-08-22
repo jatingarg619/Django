@@ -146,7 +146,7 @@ class CreateModel(ModelOperation):
             and self.name_lower == operation.old_name_lower
         ):
             return [
-                CreateModel(
+                self.__class__(
                     operation.new_name,
                     fields=self.fields,
                     options=self.options,
@@ -163,7 +163,7 @@ class CreateModel(ModelOperation):
                 if key not in operation.options:
                     options.pop(key, None)
             return [
-                CreateModel(
+                self.__class__(
                     self.name,
                     fields=self.fields,
                     options=options,
@@ -176,7 +176,7 @@ class CreateModel(ModelOperation):
             and self.name_lower == operation.name_lower
         ):
             return [
-                CreateModel(
+                self.__class__(
                     self.name,
                     fields=self.fields,
                     options=self.options,
@@ -189,7 +189,7 @@ class CreateModel(ModelOperation):
             and self.name_lower == operation.name_lower
         ):
             return [
-                CreateModel(
+                self.__class__(
                     self.name,
                     fields=self.fields,
                     options={
@@ -205,7 +205,7 @@ class CreateModel(ModelOperation):
             and self.name_lower == operation.name_lower
         ):
             return [
-                CreateModel(
+                self.__class__(
                     self.name,
                     fields=self.fields,
                     options={
@@ -222,7 +222,7 @@ class CreateModel(ModelOperation):
         ):
             if isinstance(operation, AddField):
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=self.fields + [(operation.name, operation.field)],
                         options=self.options,
@@ -232,7 +232,7 @@ class CreateModel(ModelOperation):
                 ]
             elif isinstance(operation, AlterField):
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=[
                             (n, operation.field if n == operation.name else v)
@@ -265,7 +265,7 @@ class CreateModel(ModelOperation):
                 if order_with_respect_to == operation.name_lower:
                     del options["order_with_respect_to"]
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=[
                             (n, v)
@@ -293,7 +293,7 @@ class CreateModel(ModelOperation):
                 if order_with_respect_to == operation.old_name:
                     options["order_with_respect_to"] = operation.new_name
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=[
                             (operation.new_name if n == operation.old_name else n, v)
@@ -310,7 +310,7 @@ class CreateModel(ModelOperation):
         ):
             if isinstance(operation, AddIndex):
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=self.fields,
                         options={
@@ -331,7 +331,7 @@ class CreateModel(ModelOperation):
                     if index.name != operation.name
                 ]
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=self.fields,
                         options={
@@ -344,7 +344,7 @@ class CreateModel(ModelOperation):
                 ]
             elif isinstance(operation, AddConstraint):
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=self.fields,
                         options={
@@ -365,7 +365,7 @@ class CreateModel(ModelOperation):
                     if constraint.name != operation.name
                 ]
                 return [
-                    CreateModel(
+                    self.__class__(
                         self.name,
                         fields=self.fields,
                         options={
@@ -525,7 +525,7 @@ class RenameModel(ModelOperation):
             and self.new_name_lower == operation.old_name_lower
         ):
             return [
-                RenameModel(
+                self.__class__(
                     self.old_name,
                     operation.new_name,
                 ),
@@ -1140,7 +1140,7 @@ class RenameIndex(IndexOperation):
             and self.new_name_lower == operation.old_name_lower
         ):
             return [
-                RenameIndex(
+                self.__class__(
                     self.model_name,
                     new_name=operation.new_name,
                     old_name=self.old_name,
