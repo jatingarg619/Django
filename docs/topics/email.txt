@@ -27,6 +27,28 @@ In two lines::
         fail_silently=False,
     )
 
+Sending HTML emails (with required plain text part)::
+
+    from django.core.mail import EmailMultiAlternatives
+    from django.template.loader import render_to_string
+
+    # Create email object
+    msg = EmailMultiAlternatives(
+        "Subject here",
+        "Plain text content",
+        "from@example.com",
+        ["to@example.com"],
+    )
+
+    # Render HTML content from template and attach it to mail object
+    html_content = render_to_string(
+        "templates/emails/my_email.html",
+        context={"my_variable": 42},
+    )
+    msg.attach_alternative(html_content, "text/html")
+
+    msg.send()
+
 Mail is sent using the SMTP host and port specified in the
 :setting:`EMAIL_HOST` and :setting:`EMAIL_PORT` settings. The
 :setting:`EMAIL_HOST_USER` and :setting:`EMAIL_HOST_PASSWORD` settings, if
