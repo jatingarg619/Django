@@ -1,10 +1,20 @@
+import datetime
 import unittest
 
 from django.core.exceptions import FieldError
 from django.db import IntegrityError, connection, transaction
-from django.db.models import Case, CharField, Count, F, IntegerField, Max, When
+from django.db.models import (
+    NOT_PROVIDED,
+    Case,
+    CharField,
+    Count,
+    F,
+    IntegerField,
+    Max,
+    When,
+)
 from django.db.models.functions import Abs, Concat, Lower
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.test.utils import register_lookup
 
 from .models import (
@@ -17,6 +27,7 @@ from .models import (
     RelatedPoint,
     UniqueNumber,
     UniqueNumberChild,
+    UserPreferences,
 )
 
 
@@ -224,6 +235,151 @@ class AdvancedTests(TestCase):
                         RelatedPoint.objects.annotate(
                             new_name=annotation,
                         ).update(name=F("new_name"))
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_json_key_transform(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme__color="white")
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"color": "white", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_json_multiple_key_transform(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(
+            settings__theme__color="white", settings__theme__font="Comic Sans"
+        )
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"color": "white", "font": "Comic Sans"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_json_remove(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme__color=NOT_PROVIDED)
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_combine_update_json_remove(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(
+            settings__theme__font="Comic Sans", settings__theme__color=NOT_PROVIDED
+        )
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"font": "Comic Sans"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_field_with_list_value(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme__font=["Arial", "Comic Sans"])
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"font": ["Arial", "Comic Sans"], "color": "black"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_field_with_list_value_using_index(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": ["Arial", "Calibri"]},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme__font__1="Comic Sans")
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"font": ["Arial", "Comic Sans"], "color": "black"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_field_with_previous_nonexist_key(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme__font="Arial")
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            },
+        )
+
+    @skipUnlessDBFeature("supports_partial_json_update")
+    def test_update_field_with_none_value(self):
+        user_preferences = UserPreferences.objects.create(
+            settings={
+                "theme": {"color": "black", "font": "Arial"},
+                "notifications": {"email": False, "sms": True},
+            }
+        )
+        UserPreferences.objects.update(settings__theme=None)
+        user_preferences = UserPreferences.objects.get(pk=user_preferences.pk)
+        self.assertEqual(
+            user_preferences.settings,
+            {"theme": None, "notifications": {"email": False, "sms": True}},
+        )
 
     def test_update_ordered_by_m2m_aggregation_annotation(self):
         msg = (
