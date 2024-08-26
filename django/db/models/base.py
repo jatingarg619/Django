@@ -1814,7 +1814,8 @@ class Model(AltersData, metaclass=ModelBase):
             if hint:
                 errors.append(
                     checks.Error(
-                        f"{field_name!r} cannot be included in the composite primary key.",
+                        f"{field_name!r} cannot be included in the composite primary "
+                        "key.",
                         hint=hint,
                         obj=cls,
                         id="models.E042",
@@ -1827,7 +1828,8 @@ class Model(AltersData, metaclass=ModelBase):
                 duplicates = ", ".join(repr(field) for field in rest)
                 errors.append(
                     checks.Error(
-                        f"{duplicates} cannot be included in the composite primary key.",
+                        f"{duplicates} cannot be included in the composite primary "
+                        "key.",
                         hint=f"{duplicates} and {field_name!r} are the same fields.",
                         obj=cls,
                         id="models.E042",
