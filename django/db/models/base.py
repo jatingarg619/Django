@@ -1801,21 +1801,20 @@ class Model(AltersData, metaclass=ModelBase):
                 field = None
 
             if not field:
-                hint = "'%s' is not a valid field." % (field_name,)
+                hint = f"{field_name!r} is not a valid field."
             elif not field.column:
-                hint = "'%s' field has no column." % (field_name,)
+                hint = f"{field_name!r} field has no column."
             elif field.null:
-                hint = "'%s' field may not set 'null=True'." % (field_name,)
+                hint = f"{field_name!r} field may not set 'null=True'."
             elif field.generated:
-                hint = "'%s' field is a generated field." % (field_name,)
+                hint = f"{field_name!r} field is a generated field."
             else:
                 seen_columns[field.column].append(field_name)
 
             if hint:
                 errors.append(
                     checks.Error(
-                        "'%s' cannot be included in the composite primary key."
-                        % (field_name,),
+                        f"{field_name!r} cannot be included in the composite primary key.",
                         hint=hint,
                         obj=cls,
                         id="models.E042",
@@ -1824,14 +1823,12 @@ class Model(AltersData, metaclass=ModelBase):
 
         for column, field_names in seen_columns.items():
             if len(field_names) > 1:
-                field_name = "'%s'" % field_names[0]
-                duplicates = ", ".join("'%s'" % (f,) for f in field_names[1:])
+                field_name, *rest = field_names
+                duplicates = ", ".join(repr(field) for field in rest)
                 errors.append(
                     checks.Error(
-                        "%s cannot be included in the composite primary key."
-                        % (duplicates,),
-                        hint="%s and %s are the same fields."
-                        % (duplicates, field_name),
+                        f"{duplicates} cannot be included in the composite primary key.",
+                        hint=f"{duplicates} and {field_name!r} are the same fields.",
                         obj=cls,
                         id="models.E042",
                     )

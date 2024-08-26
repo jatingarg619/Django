@@ -31,9 +31,9 @@ class CompositeAttribute:
             values = (None,) * len(attnames)
 
         if not isinstance(values, (list, tuple)):
-            raise ValueError(f"'{self.field.name}' must be a list or a tuple.")
+            raise ValueError(f"{self.field.name!r} must be a list or a tuple.")
         if len(attnames) != len(values):
-            raise ValueError(f"'{self.field.name}' must have {len(attnames)} elements.")
+            raise ValueError(f"{self.field.name!r} must have {len(attnames)} elements.")
 
         for attname, value in zip(attnames, values):
             setattr(instance, attname, value)
@@ -66,7 +66,8 @@ class CompositePrimaryKey(Field):
         super().__init__(**kwargs)
 
     def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
+        # args is always [] so it can be ignored.
+        name, path, _, kwargs = super().deconstruct()
         return name, path, self.field_names, kwargs
 
     @cached_property
