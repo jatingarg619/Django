@@ -27,7 +27,7 @@ Use ``send_mail()`` for simpler cases. For example, to send a plain text only me
         fail_silently=False,
     )
 
-Use EmailMessage or EmailMultiAlternatives for additional functionality.
+Use ``EmailMessage`` or ``EmailMultiAlternatives`` for additional functionality.
 For example, to send an HTML and plain text message using a template and
 custom headers::
 
