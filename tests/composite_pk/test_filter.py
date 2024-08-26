@@ -205,8 +205,8 @@ class CompositePKFilterTests(TestCase):
         )
 
     def test_filter_comments_by_user_and_contains(self):
-        self.assertTrue(
-            Comment.objects.filter(user=self.user_1).contains(self.comment_1)
+        self.assertIs(
+            Comment.objects.filter(user=self.user_1).contains(self.comment_1), True
         )
 
     def test_filter_users_by_comments_in(self):

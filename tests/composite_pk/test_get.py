@@ -87,7 +87,7 @@ class CompositePKGetTests(TestCase):
             with self.subTest(fields=fields):
                 count = User.objects.count()
                 user, created = User.objects.get_or_create(**fields)
-                self.assertFalse(created)
+                self.assertIs(created, False)
                 self.assertEqual(user.id, self.user_1.id)
                 self.assertEqual(user.pk, (self.tenant_1.id, self.user_1.id))
                 self.assertEqual(user.tenant_id, self.tenant_1.id)

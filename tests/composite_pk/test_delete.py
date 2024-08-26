@@ -43,13 +43,13 @@ class CompositePKDeleteTests(TestCase):
             ),
         )
 
-        self.assertFalse(Tenant.objects.filter(pk=self.tenant_1.pk).exists())
-        self.assertTrue(Tenant.objects.filter(pk=self.tenant_2.pk).exists())
-        self.assertFalse(User.objects.filter(pk=self.user_1.pk).exists())
-        self.assertTrue(User.objects.filter(pk=self.user_2.pk).exists())
-        self.assertFalse(Comment.objects.filter(pk=self.comment_1.pk).exists())
-        self.assertTrue(Comment.objects.filter(pk=self.comment_2.pk).exists())
-        self.assertTrue(Comment.objects.filter(pk=self.comment_3.pk).exists())
+        self.assertIs(Tenant.objects.filter(pk=self.tenant_1.pk).exists(), False)
+        self.assertIs(Tenant.objects.filter(pk=self.tenant_2.pk).exists(), True)
+        self.assertIs(User.objects.filter(pk=self.user_1.pk).exists(), False)
+        self.assertIs(User.objects.filter(pk=self.user_2.pk).exists(), True)
+        self.assertIs(Comment.objects.filter(pk=self.comment_1.pk).exists(), False)
+        self.assertIs(Comment.objects.filter(pk=self.comment_2.pk).exists(), True)
+        self.assertIs(Comment.objects.filter(pk=self.comment_3.pk).exists(), True)
 
     def test_delete_user_by_pk(self):
         result = User.objects.filter(pk=self.user_1.pk).delete()
@@ -58,20 +58,20 @@ class CompositePKDeleteTests(TestCase):
             result, (2, {"composite_pk.User": 1, "composite_pk.Comment": 1})
         )
 
-        self.assertFalse(User.objects.filter(pk=self.user_1.pk).exists())
-        self.assertTrue(User.objects.filter(pk=self.user_2.pk).exists())
-        self.assertFalse(Comment.objects.filter(pk=self.comment_1.pk).exists())
-        self.assertTrue(Comment.objects.filter(pk=self.comment_2.pk).exists())
-        self.assertTrue(Comment.objects.filter(pk=self.comment_3.pk).exists())
+        self.assertIs(User.objects.filter(pk=self.user_1.pk).exists(), False)
+        self.assertIs(User.objects.filter(pk=self.user_2.pk).exists(), True)
+        self.assertIs(Comment.objects.filter(pk=self.comment_1.pk).exists(), False)
+        self.assertIs(Comment.objects.filter(pk=self.comment_2.pk).exists(), True)
+        self.assertIs(Comment.objects.filter(pk=self.comment_3.pk).exists(), True)
 
     def test_delete_comments_by_user(self):
         result = Comment.objects.filter(user=self.user_2).delete()
 
         self.assertEqual(result, (2, {"composite_pk.Comment": 2}))
 
-        self.assertTrue(Comment.objects.filter(pk=self.comment_1.pk).exists())
-        self.assertFalse(Comment.objects.filter(pk=self.comment_2.pk).exists())
-        self.assertFalse(Comment.objects.filter(pk=self.comment_3.pk).exists())
+        self.assertIs(Comment.objects.filter(pk=self.comment_1.pk).exists(), True)
+        self.assertIs(Comment.objects.filter(pk=self.comment_2.pk).exists(), False)
+        self.assertIs(Comment.objects.filter(pk=self.comment_3.pk).exists(), False)
 
     def test_delete_without_pk(self):
         msg = (

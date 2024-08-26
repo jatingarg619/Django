@@ -33,22 +33,22 @@ class CompositePKTests(TestCase):
     def test_pk_updated_if_field_updated(self):
         user = User.objects.get(pk=self.user.pk)
         self.assertEqual(user.pk, (self.tenant.id, self.user.id))
-        self.assertTrue(user._is_pk_set())
+        self.assertIs(user._is_pk_set(), True)
         user.tenant_id = 9831
         self.assertEqual(user.pk, (9831, self.user.id))
-        self.assertTrue(user._is_pk_set())
+        self.assertIs(user._is_pk_set(), True)
         user.id = 4321
         self.assertEqual(user.pk, (9831, 4321))
-        self.assertTrue(user._is_pk_set())
+        self.assertIs(user._is_pk_set(), True)
         user.pk = (9132, 3521)
         self.assertEqual(user.tenant_id, 9132)
         self.assertEqual(user.id, 3521)
-        self.assertTrue(user._is_pk_set())
+        self.assertIs(user._is_pk_set(), True)
         user.id = None
         self.assertEqual(user.pk, (9132, None))
         self.assertEqual(user.tenant_id, 9132)
         self.assertIsNone(user.id)
-        self.assertFalse(user._is_pk_set())
+        self.assertIs(user._is_pk_set(), False)
 
     def test_hash(self):
         self.assertEqual(hash(User(pk=(1, 2))), hash((1, 2)))
@@ -121,36 +121,36 @@ class CompositePKTests(TestCase):
         user_constraints = self.get_constraints(User._meta.db_table)
         user_pk = user_constraints["composite_pk_user_pkey"]
         self.assertEqual(user_pk["columns"], ["tenant_id", "id"])
-        self.assertTrue(user_pk["primary_key"])
+        self.assertIs(user_pk["primary_key"], True)
 
         comment_constraints = self.get_constraints(Comment._meta.db_table)
         comment_pk = comment_constraints["composite_pk_comment_pkey"]
         self.assertEqual(comment_pk["columns"], ["tenant_id", "comment_id"])
-        self.assertTrue(comment_pk["primary_key"])
+        self.assertIs(comment_pk["primary_key"], True)
 
     @unittest.skipUnless(connection.vendor == "sqlite", "SQLite specific test")
     def test_get_constraints_sqlite(self):
         user_constraints = self.get_constraints(User._meta.db_table)
         user_pk = user_constraints["__primary__"]
         self.assertEqual(user_pk["columns"], ["tenant_id", "id"])
-        self.assertTrue(user_pk["primary_key"])
+        self.assertIs(user_pk["primary_key"], True)
 
         comment_constraints = self.get_constraints(Comment._meta.db_table)
         comment_pk = comment_constraints["__primary__"]
         self.assertEqual(comment_pk["columns"], ["tenant_id", "comment_id"])
-        self.assertTrue(comment_pk["primary_key"])
+        self.assertIs(comment_pk["primary_key"], True)
 
     @unittest.skipUnless(connection.vendor == "mysql", "MySQL specific test")
     def test_get_constraints_mysql(self):
         user_constraints = self.get_constraints(User._meta.db_table)
         user_pk = user_constraints["PRIMARY"]
         self.assertEqual(user_pk["columns"], ["tenant_id", "id"])
-        self.assertTrue(user_pk["primary_key"])
+        self.assertIs(user_pk["primary_key"], True)
 
         comment_constraints = self.get_constraints(Comment._meta.db_table)
         comment_pk = comment_constraints["PRIMARY"]
         self.assertEqual(comment_pk["columns"], ["tenant_id", "comment_id"])
-        self.assertTrue(comment_pk["primary_key"])
+        self.assertIs(comment_pk["primary_key"], True)
 
     @unittest.skipUnless(connection.vendor == "oracle", "Oracle specific test")
     def test_get_constraints_oracle(self):
