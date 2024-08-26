@@ -4,11 +4,6 @@ from .models import Comment, Tenant, Token, User
 
 
 class CompositePKUpdateTests(TestCase):
-    """
-    Test the .update(), .save(), .bulk_update(), .update_or_create() methods of
-    composite_pk models.
-    """
-
     maxDiff = None
 
     @classmethod

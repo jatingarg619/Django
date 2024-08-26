@@ -7,10 +7,6 @@ from .models import Post, Tenant, User
 
 
 class CompositePKValuesTests(TestCase):
-    """
-    Test the .values(), .value_list() methods of composite_pk models.
-    """
-
     USER_1_EMAIL = "user0001@example.com"
     USER_2_EMAIL = "user0002@example.com"
     USER_3_EMAIL = "user0003@example.com"

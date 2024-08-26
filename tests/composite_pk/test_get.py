@@ -4,10 +4,6 @@ from .models import Comment, Tenant, User
 
 
 class CompositePKGetTests(TestCase):
-    """
-    Test the .get(), .get_or_create() methods of composite_pk models.
-    """
-
     maxDiff = None
 
     @classmethod

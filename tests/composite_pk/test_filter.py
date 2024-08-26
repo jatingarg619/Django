@@ -4,10 +4,6 @@ from .models import Comment, Tenant, User
 
 
 class CompositePKFilterTests(TestCase):
-    """
-    Test the .filter(), .order_by(), .exclude() methods of composite_pk models.
-    """
-
     maxDiff = None
 
     @classmethod

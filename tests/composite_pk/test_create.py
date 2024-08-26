@@ -4,11 +4,6 @@ from .models import Tenant, User
 
 
 class CompositePKCreateTests(TestCase):
-    """
-    Test the .create(), .save(), .bulk_create(), .get_or_create(), .update_or_create()
-    methods of composite_pk models.
-    """
-
     maxDiff = None
 
     @classmethod
