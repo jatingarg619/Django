@@ -139,8 +139,12 @@ CompositePrimaryKey.register_lookup(TupleIsNull)
 
 
 def unnest(fields):
+    result = []
+
     for field in fields:
         if isinstance(field, CompositePrimaryKey):
-            yield from field.fields
+            result.extend(field.fields)
         else:
-            yield field
+            result.append(field)
+
+    return result

@@ -132,18 +132,16 @@ Many database functions only accept a single field.
 
 .. code-block:: sql
 
-    COUNT("order_id")  -- OK
-    COUNT("product_id", "order_id")  -- ERROR
+    MAX("order_id")  -- OK
+    MAX("product_id", "order_id")  -- ERROR
 
 These database functions cannot be used with composite primary keys, as
 composite primary keys are a proxy to multiple fields.
 
 .. code-block:: pycon
 
-    Count("order_id")  -- OK
-    Count("pk")  -- ERROR
-    Count("foo_set__id")  -- OK
-    Count("foo_set")  -- ERROR
+    Max("order_id")  -- OK
+    Max("pk")  -- ERROR
 
 Composite primary keys and admin
 ================================
