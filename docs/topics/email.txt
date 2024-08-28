@@ -27,7 +27,8 @@ Use :func:`send_mail` for simpler cases. For example, to send a plain text only 
         fail_silently=False,
     )
 
-Use :cls:`EmailMessage` or :cls:`EmailMultiAlternatives` for additional functionality.
+Use :class:`EmailMessage` or :class:`EmailMultiAlternatives` for additional
+functionality.
 For example, to send an HTML and plain text message using a template and
 custom headers::
 
