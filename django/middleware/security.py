@@ -9,7 +9,6 @@ from django.middleware.constants import csp
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 
-
 # TODO: Consider if we want to exclude CSP from a default set of views in DEBUG
 # mode.
 
