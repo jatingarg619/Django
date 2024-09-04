@@ -256,6 +256,25 @@ class StdDev(NumericOutputFieldMixin, Aggregate):
         return {**super()._get_repr_options(), "sample": self.function == "STDDEV_SAMP"}
 
 
+class StringAggDelimiter(Func):
+    arity = 1
+    template = "%(expressions)s"
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__(value)
+
+    def as_mysql(self, compiler, connection, **extra_context):
+        template = " SEPARATOR %(expressions)s"
+
+        return self.as_sql(
+            compiler,
+            connection,
+            template=template,
+            **extra_context,
+        )
+
+
 class StringAgg(Aggregate):
     template = "%(function)s(%(distinct)s%(expressions)s%(order_by)s)%(filter)s"
     function = "STRING_AGG"
@@ -265,7 +284,8 @@ class StringAgg(Aggregate):
     output_field = TextField()
 
     def __init__(self, expression, delimiter, **extra):
-        super().__init__(expression, delimiter, **extra)
+        self.delimiter = StringAggDelimiter(delimiter)
+        super().__init__(expression, self.delimiter, **extra)
 
     def as_oracle(self, compiler, connection, **extra_context):
         if self.order_by:
@@ -276,7 +296,7 @@ class StringAgg(Aggregate):
         else:
             template = "%(function)s(%(distinct)s%(expressions)s)%(filter)s"
 
-        return self.as_sql(
+        return super().as_sql(
             compiler,
             connection,
             function="LISTAGG",
@@ -285,12 +305,31 @@ class StringAgg(Aggregate):
         )
 
     def as_mysql(self, compiler, connection, **extra_context):
-        return self.as_sql(
-            compiler,
-            connection,
-            function="GROUP_CONCAT",
-            **extra_context,
-        )
+        """
+        Compile the aggregate for MySQL.
+
+        MySQL does not treat the delimiter as an expression like other database
+        backends. Instead, it is put at the end of the aggregate using the `SEPARATOR`
+        declaration. Because of this, the creation of the delimiter SQL and the ordering
+        of the parameters must be handled explicitly.
+        """
+        extra_context["function"] = "GROUP_CONCAT"
+
+        template = "%(function)s(%(distinct)s%(expressions)s%(order_by)s%(delimiter)s)"
+        extra_context["template"] = template
+
+        c = self.copy()
+
+        delimiter_params = []
+        if c.delimiter:
+            delimiter_sql, delimiter_params = compiler.compile(c.delimiter)
+            # Drop the delimiter from the source expressions
+            c.source_expressions = c.source_expressions[:-1]
+            extra_context["delimiter"] = delimiter_sql
+
+        sql, params = c.as_sql(compiler, connection, **extra_context)
+
+        return sql, (*params, *delimiter_params)
 
     def as_sqlite(self, compiler, connection, **extra_context):
         if connection.get_database_version() < (3, 44):
