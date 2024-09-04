@@ -1,3 +1,6 @@
+from django.db.models import F, Value
+from django.db.models.functions import Concat
+
 from . import PostgreSQLTestCase
 from .models import CharFieldModel, TextFieldModel
 
@@ -147,6 +150,22 @@ class TrigramTest(PostgreSQLTestCase):
                 {"field": "Cat sat on mat.", "word_distance": 0.5},
                 {"field": "Matthew", "word_distance": 0.5555556},
             ],
+        )
+
+    def test_trigram_concat_precedence(self):
+        """
+        Trigram functions should be wrapped in parentheses to be safe
+        as if one used CONCAT(...)
+        """
+        search_term = "Mat"
+        self.assertSequenceEqual(
+            self.Model.objects.annotate(
+                concat_result=Concat(F("field"), Value("tew")),
+                similarity=TrigramSimilarity("concat_result", search_term),
+            )
+            .filter(concat_result__trigram_similar=search_term)
+            .values("field"),
+            [{"field": "Matthew"}],
         )
 
 
