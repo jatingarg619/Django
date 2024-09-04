@@ -301,7 +301,7 @@ class DateMixin:
 
 class BaseDateListView(MultipleObjectMixin, DateMixin, View):
     """
-    A base class for date-based views displaying a list of objects.
+    Base class for date-based views displaying a list of objects.
 
     Requires subclassing to provide a response mixin.
     """
@@ -392,7 +392,7 @@ class BaseDateListView(MultipleObjectMixin, DateMixin, View):
 
 class BaseArchiveIndexView(BaseDateListView):
     """
-    A base view for archives of date-based items.
+    Base view for archives of date-based items.
 
     Requires subclassing to provide a response mixin.
     """
@@ -418,7 +418,7 @@ class ArchiveIndexView(MultipleObjectTemplateResponseMixin, BaseArchiveIndexView
 
 class BaseYearArchiveView(YearMixin, BaseDateListView):
     """
-    A base view for a list of objects published in a given year.
+    Base view for a list of objects published in a given year.
 
     Requires subclassing to provide a response mixin.
     """
@@ -474,7 +474,7 @@ class YearArchiveView(MultipleObjectTemplateResponseMixin, BaseYearArchiveView):
 
 class BaseMonthArchiveView(YearMixin, MonthMixin, BaseDateListView):
     """
-    A base view for a list of objects published in a given month.
+    Base view for a list of objects published in a given month.
 
     Requires subclassing to provide a response mixin.
     """
@@ -520,7 +520,7 @@ class MonthArchiveView(MultipleObjectTemplateResponseMixin, BaseMonthArchiveView
 
 class BaseWeekArchiveView(YearMixin, WeekMixin, BaseDateListView):
     """
-    A base view for a list of objects published in a given week.
+    Base view for a list of objects published in a given week.
 
     Requires subclassing to provide a response mixin.
     """
@@ -582,7 +582,7 @@ class WeekArchiveView(MultipleObjectTemplateResponseMixin, BaseWeekArchiveView):
 
 class BaseDayArchiveView(YearMixin, MonthMixin, DayMixin, BaseDateListView):
     """
-    A base view for a list of objects published on a given day.
+    Base view for a list of objects published on a given day.
 
     Requires subclassing to provide a response mixin.
     """
@@ -633,7 +633,7 @@ class DayArchiveView(MultipleObjectTemplateResponseMixin, BaseDayArchiveView):
 
 class BaseTodayArchiveView(BaseDayArchiveView):
     """
-    A base view for a list of objects published today.
+    Base view for a list of objects published today.
 
     Requires subclassing to provide a response mixin.
     """
@@ -651,7 +651,7 @@ class TodayArchiveView(MultipleObjectTemplateResponseMixin, BaseTodayArchiveView
 
 class BaseDateDetailView(YearMixin, MonthMixin, DayMixin, DateMixin, BaseDetailView):
     """
-    A base detail view for a single object on a single date; this differs from the
+    Base detail view for a single object on a single date; this differs from the
     standard DetailView by accepting a year/month/day in the URL.
 
     Requires subclassing to provide a response mixin.

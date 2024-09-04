@@ -103,7 +103,7 @@ class SingleObjectMixin(ContextMixin):
 
 class BaseDetailView(SingleObjectMixin, View):
     """
-    A base view for displaying a single object.
+    Base view for displaying a single object.
 
     Requires subclassing to provide a response mixin.
     """
