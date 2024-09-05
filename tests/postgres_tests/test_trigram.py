@@ -161,7 +161,6 @@ class TrigramTest(PostgreSQLTestCase):
         self.assertSequenceEqual(
             self.Model.objects.annotate(
                 concat_result=Concat(F("field"), Value("tew")),
-                similarity=TrigramSimilarity("concat_result", search_term),
             )
             .filter(concat_result__trigram_similar=search_term)
             .values("field"),
