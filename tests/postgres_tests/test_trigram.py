@@ -157,10 +157,10 @@ class TrigramTest(PostgreSQLTestCase):
         Trigram functions should be wrapped in parentheses to be safe
         as if one used CONCAT(...)
         """
-        search_term = "Mat"
+        search_term = "im matthew"
         self.assertSequenceEqual(
             self.Model.objects.annotate(
-                concat_result=Concat(F("field"), Value("tew")),
+                concat_result=Concat(Value("I'm "), F("field")),
             )
             .filter(concat_result__trigram_similar=search_term)
             .values("field"),
