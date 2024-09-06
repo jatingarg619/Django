@@ -161,7 +161,8 @@ class TrigramTest(PostgreSQLTestCase):
         self.assertSequenceEqual(
             self.Model.objects.annotate(
                 concat_result=Concat(
-                    Value("I'm "), F("field"),
+                    Value("I'm "),
+                    F("field"),
                     output_field=self.model._meta.get_field("field"),
                 ),
             )
