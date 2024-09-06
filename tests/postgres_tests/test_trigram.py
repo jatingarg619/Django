@@ -163,7 +163,7 @@ class TrigramTest(PostgreSQLTestCase):
                 concat_result=Concat(
                     Value("I'm "),
                     F("field"),
-                    output_field=self.model._meta.get_field("field"),
+                    output_field=self.Model._meta.get_field("field"),
                 ),
             )
             .filter(concat_result__trigram_similar=search_term)
