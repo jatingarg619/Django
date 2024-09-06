@@ -1468,8 +1468,8 @@ class MigrationAutodetector:
 
             for old_c in old_constraints:
                 for new_c in new_constraints:
-                    old_c_dec = self.deep_deconstruct(old_c)
-                    new_c_dec = self.deep_deconstruct(new_c)
+                    old_c_dec = old_c.deconstruct()
+                    new_c_dec = new_c.deconstruct()
                     if old_c_dec != new_c_dec and old_c.name == new_c.name:
                         alt_constraints.append(new_c)
                         alt_constraints_name.append(new_c.name)
