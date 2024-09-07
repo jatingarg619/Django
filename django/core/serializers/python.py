@@ -108,7 +108,6 @@ class Deserializer(base.Deserializer):
         self, object_list, *, using=DEFAULT_DB_ALIAS, ignorenonexistent=False, **options
     ):
         super().__init__(object_list, **options)
-        self.object_list = object_list
         self.handle_forward_references = options.pop("handle_forward_references", False)
         self.using = using
         self.ignorenonexistent = ignorenonexistent
@@ -116,7 +115,7 @@ class Deserializer(base.Deserializer):
         self._iterator = None
 
     def __iter__(self):
-        for obj in self.object_list:
+        for obj in self.stream:
             yield from self._handle_object(obj)
 
     def __next__(self):
