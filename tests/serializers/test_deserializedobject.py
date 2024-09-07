@@ -18,14 +18,14 @@ class TestDeserializedObjectTests(SimpleTestCase):
     def test_custom_deserializer(self):
         class CustomDeserializer(serializers.python.Deserializer):
             @staticmethod
-            def _get_model(model_identifier):
+            def _get_model_from_node(model_identifier):
                 return Author
 
         test_string = """
             [
                 {
                     "pk": 1,
-                    "model": "serializers.author2",
+                    "model": "serializers.author",
                     "fields": {
                         "name": "Jane"
                     }
