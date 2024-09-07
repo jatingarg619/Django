@@ -116,17 +116,13 @@ class Deserializer(base.Deserializer):
         self._iterator = None
 
     def __iter__(self):
-        self._iterator = self._handle_objects()
-        return self._iterator
+        for obj in self.object_list:
+            yield from self._handle_object(obj)
 
     def __next__(self):
         if self._iterator is None:
-            self.__iter__()
+            self._iterator = iter(self)
         return next(self._iterator)
-
-    def _handle_objects(self):
-        for obj in self.object_list:
-            yield self._handle_object(obj)
 
     def _handle_object(self, obj):
         data = {}
@@ -204,7 +200,7 @@ class Deserializer(base.Deserializer):
                     )
 
         model_instance = base.build_instance(Model, data, self.using)
-        return base.DeserializedObject(model_instance, m2m_data, deferred_fields)
+        yield base.DeserializedObject(model_instance, m2m_data, deferred_fields)
 
     def _handle_m2m_field_node(self, field, field_value):
         return base.deserialize_m2m_values(
