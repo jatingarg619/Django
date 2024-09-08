@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.admin.utils import unquote
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, get_user_model
 from django.contrib.auth.forms import (
     AdminPasswordChangeForm,
     AdminUserCreationForm,
@@ -113,7 +113,17 @@ class UserAdmin(admin.ModelAdmin):
         return not lookup.startswith("password") and super().lookup_allowed(
             lookup, value, request
         )
-
+        
+    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        
+        if add:
+            username_field = get_user_model().USERNAME_FIELD
+            context.update({
+                "username": username_field
+            })
+        
+        return super().render_change_form(request, context, add, change, form_url, obj)
+    
     @sensitive_post_parameters_m
     @csrf_protect_m
     def add_view(self, request, form_url="", extra_context=None):
