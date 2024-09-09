@@ -70,7 +70,7 @@ class DisallowedDatabaseQueriesTests(TransactionTestCase):
             Car.objects.using("other").get()
 
 
-class FixtureAvailableInSetUpClass(TransactionTestCase):
+class FixtureAvailableInSetUpClassTest(TransactionTestCase):
     available_apps = ["test_utils"]
     fixtures = ["person.json"]
 
