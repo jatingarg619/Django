@@ -530,6 +530,46 @@ class HttpResponseTests(SimpleTestCase):
                 headers={"Content-Type": "text/csv"},
             )
 
+    def test_text_property(self):
+        test_cases = [
+            (
+                "Hello, world!",
+                "Updated content",
+                "Hello, world!",
+                "Updated content",
+                None,
+                "Initial content test failed.",
+            ),
+            (
+                b"Ol\xc3\xa1 Mundo",
+                b"Ol\xe1 Mundo",
+                "Olá Mundo",
+                "Olá Mundo",
+                "iso-8859-1",
+                "UTF-8 encoding test failed.",
+            ),
+        ]
+
+        for (
+            initial_content,
+            updated_content,
+            expected_initial,
+            expected_updated,
+            charset,
+            description,
+        ) in test_cases:
+            with self.subTest(content=initial_content):
+                response = HttpResponse(
+                    initial_content,
+                    content_type="text/plain; charset=utf-8" if charset else None,
+                )
+                self.assertEqual(response.text, expected_initial, description)
+
+                response.content = updated_content
+                if charset:
+                    response.charset = charset
+                self.assertEqual(response.text, expected_updated, description)
+
 
 class HttpResponseSubclassesTests(SimpleTestCase):
     def test_redirect(self):
