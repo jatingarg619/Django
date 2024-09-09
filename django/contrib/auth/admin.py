@@ -113,7 +113,7 @@ class UserAdmin(admin.ModelAdmin):
         return not lookup.startswith("password") and super().lookup_allowed(
             lookup, value, request
         )
-    
+
     @sensitive_post_parameters_m
     @csrf_protect_m
     def add_view(self, request, form_url="", extra_context=None):
