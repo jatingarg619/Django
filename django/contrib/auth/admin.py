@@ -116,14 +116,6 @@ class UserAdmin(admin.ModelAdmin):
         return not lookup.startswith("password") and super().lookup_allowed(
             lookup, value, request
         )
-        
-    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
-        if add:
-            username_field = get_user_model().USERNAME_FIELD
-            context.update({
-                "username": username_field
-            })
-        return super().render_change_form(request, context, add, change, form_url, obj)
     
     @sensitive_post_parameters_m
     @csrf_protect_m
@@ -158,6 +150,7 @@ class UserAdmin(admin.ModelAdmin):
         defaults = {
             "auto_populated_fields": (),
             "username_help_text": username_field.help_text,
+            "username_field_name": username_field.verbose_name,
         }
         extra_context.update(defaults)
         return super().add_view(request, form_url, extra_context)
