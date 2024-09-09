@@ -490,6 +490,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             self._remake_table(model)
 
     def alter_constraint(self, model, old_constraint, new_constraint):
+        if not self._constraint_should_be_altered(old_constraint, new_constraint):
+            return
+
         if isinstance(new_constraint, UniqueConstraint) and (
             new_constraint.condition
             or new_constraint.contains_expressions

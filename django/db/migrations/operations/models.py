@@ -1322,3 +1322,7 @@ class AlterConstraint(IndexOperation):
 
     def describe(self):
         return f"Alter constraint {self.name} on {self.model_name}"
+
+    @property
+    def migration_name_fragment(self):
+        return f"alter_{self.model_name_lower}_{self.constraint.name.lower()}"
