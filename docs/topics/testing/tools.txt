@@ -1267,6 +1267,11 @@ Here's specifically what will happen:
   any fixture named ``birds``. See the :ref:`fixtures-explanation` topic for
   more details on defining and installing fixtures.
 
+For most unit tests using :class:`TestCase`, Django doesn't need to do
+anything else, because transactions are used to clean the database after each
+test for performance reasons. But for :class:`TransactionTestCase`, the
+following actions will take place:
+
 * At the end of each test Django will flush the database, returning the
   database to the state it was in directly after :djadmin:`migrate` was
   called.
@@ -1274,10 +1279,8 @@ Here's specifically what will happen:
 * For each subsequent test, the fixtures will be reloaded before ``setUp()``
   is run.
 
-For performance reasons, :class:`TestCase` uses transactions to clean the
-database after each test instead of flushing. This avoids the need to reload
-fixtures before each test. In any case, you can be certain that the outcome of
-a test will not be affected by another test or by the order of test execution.
+In any case, you can be certain that the outcome of a test will not be
+affected by another test or by the order of test execution.
 
 By default, fixtures are only loaded into the ``default`` database. If you are
 using multiple databases and set :attr:`TransactionTestCase.databases`,
