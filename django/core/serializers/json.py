@@ -7,7 +7,6 @@ import decimal
 import json
 import uuid
 
-from django.core.serializers import base
 from django.core.serializers.base import DeserializationError
 from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.core.serializers.python import Serializer as PythonSerializer
@@ -60,34 +59,27 @@ class Serializer(PythonSerializer):
         return super(PythonSerializer, self).getvalue()
 
 
-class Deserializer(base.Deserializer):
+class Deserializer(PythonDeserializer):
     """Deserialize a stream or string of JSON data."""
 
     def __init__(self, stream_or_string, **options):
-        super().__init__(stream_or_string, **options)
-        self._iterator = None
-
-    def __iter__(self):
-        self._iterator = self._handle_object()
-        return self._iterator
-
-    def __next__(self):
-        if self._iterator is None:
-            self.__iter__()
-        return next(self._iterator)
-
-    def _handle_object(self):
-        if not isinstance(self.stream, (bytes, str)):
-            self.stream = self.stream.read()
-        if isinstance(self.stream, bytes):
-            self.stream = self.stream.decode()
+        if not isinstance(stream_or_string, (bytes, str)):
+            stream_or_string = stream_or_string.read()
+        if isinstance(stream_or_string, bytes):
+            stream_or_string = stream_or_string.decode()
         try:
-            objects = json.loads(self.stream)
-            yield from PythonDeserializer(objects, **self.options)
+            objects = json.loads(stream_or_string)
+        except Exception as exc:
+            raise DeserializationError() from exc
+        super().__init__(objects, **options)
+
+    def _handle_object(self, obj):
+        try:
+            yield from super()._handle_object(obj)
         except (GeneratorExit, DeserializationError):
             raise
         except Exception as exc:
-            raise DeserializationError() from exc
+            raise DeserializationError(f"Error deserializing object: {exc}") from exc
 
 
 class DjangoJSONEncoder(json.JSONEncoder):

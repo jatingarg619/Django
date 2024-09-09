@@ -127,7 +127,6 @@ class Deserializer(base.Deserializer):
         data = {}
         m2m_data = {}
         deferred_fields = {}
-        field_names = set()
 
         # Look up the model and starting build a dict of data for it.
         try:
@@ -144,12 +143,9 @@ class Deserializer(base.Deserializer):
                     e, obj["model"], obj.get("pk"), None
                 )
 
-        if self.ignorenonexistent:
-            if Model not in self.field_names_cache:
-                self.field_names_cache[Model] = {
-                    f.name for f in Model._meta.get_fields()
-                }
-            field_names = self.field_names_cache[Model]
+        if Model not in self.field_names_cache:
+            self.field_names_cache[Model] = {f.name for f in Model._meta.get_fields()}
+        field_names = self.field_names_cache[Model]
 
         # Handle each field
         for field_name, field_value in obj["fields"].items():

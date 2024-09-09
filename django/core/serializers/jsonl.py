@@ -4,7 +4,6 @@ Serialize data to/from JSON Lines
 
 import json
 
-from django.core.serializers import base
 from django.core.serializers.base import DeserializationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.serializers.python import Deserializer as PythonDeserializer
@@ -40,34 +39,30 @@ class Serializer(PythonSerializer):
         return super(PythonSerializer, self).getvalue()
 
 
-class Deserializer(base.Deserializer):
+class Deserializer(PythonDeserializer):
     """Deserialize a stream or string of JSON data."""
 
     def __init__(self, stream_or_string, **options):
-        super().__init__(stream_or_string, **options)
-        self._iterator = None
+        if isinstance(stream_or_string, bytes):
+            stream_or_string = stream_or_string.decode()
+        if isinstance(stream_or_string, str):
+            stream_or_string = stream_or_string.splitlines()
+        super().__init__(Deserializer._get_lines(stream_or_string), **options)
 
-    def __iter__(self):
-        self._iterator = self._handle_object()
-        return self._iterator
+    def _handle_object(self, obj):
+        try:
+            yield from super()._handle_object(obj)
+        except (GeneratorExit, DeserializationError):
+            raise
+        except Exception as exc:
+            raise DeserializationError(f"Error deserializing object: {exc}") from exc
 
-    def __next__(self):
-        if self._iterator is None:
-            self.__iter__()
-        return next(self._iterator)
-
-    def _handle_object(self):
-        if isinstance(self.stream, bytes):
-            self.stream = self.stream.decode()
-        if isinstance(self.stream, (bytes, str)):
-            self.stream = self.stream.split("\n")
-
-        for line in self.stream:
+    @staticmethod
+    def _get_lines(stream):
+        for line in stream:
             if not line.strip():
                 continue
             try:
-                yield from PythonDeserializer([json.loads(line)], **self.options)
-            except (GeneratorExit, DeserializationError):
-                raise
+                yield json.loads(line)
             except Exception as exc:
                 raise DeserializationError() from exc

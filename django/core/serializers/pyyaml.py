@@ -6,11 +6,9 @@ Requires PyYaml (https://pyyaml.org/), but that's checked for in __init__.
 
 import collections
 import decimal
-from io import StringIO
 
 import yaml
 
-from django.core.serializers import base
 from django.core.serializers.base import DeserializationError
 from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.core.serializers.python import Serializer as PythonSerializer
@@ -67,34 +65,23 @@ class Serializer(PythonSerializer):
         return super(PythonSerializer, self).getvalue()
 
 
-class Deserializer(base.Deserializer):
+class Deserializer(PythonDeserializer):
     """Deserialize a stream or string of YAML data."""
 
     def __init__(self, stream_or_string, **options):
-        super().__init__(stream_or_string, **options)
-        self._iterator = None
-
-    def __iter__(self):
-        self._iterator = self._handle_object()
-        return self._iterator
-
-    def __next__(self):
-        if self._iterator is None:
-            self.__iter__()
-        return next(self._iterator)
-
-    def _handle_object(self):
-        if isinstance(self.stream, bytes):
-            self.stream = self.stream.decode()
-        if isinstance(self.stream, str):
-            stream = StringIO(self.stream)
-        else:
-            stream = self.stream
+        stream = stream_or_string
+        if isinstance(stream_or_string, bytes):
+            stream = stream_or_string.decode()
         try:
-            yield from PythonDeserializer(
-                yaml.load(stream, Loader=SafeLoader), **self.options
-            )
+            objects = yaml.load(stream, Loader=SafeLoader)
+        except Exception as exc:
+            raise DeserializationError() from exc
+        super().__init__(objects, **options)
+
+    def _handle_object(self, obj):
+        try:
+            yield from super()._handle_object(obj)
         except (GeneratorExit, DeserializationError):
             raise
         except Exception as exc:
-            raise DeserializationError() from exc
+            raise DeserializationError(f"Error deserializing object: {exc}") from exc
