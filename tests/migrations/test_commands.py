@@ -23,7 +23,6 @@ from django.db import (
 )
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.backends.utils import truncate_name
-from django.db.migrations import MigrationAutodetector
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.exceptions import InconsistentMigrationHistory
 from django.db.migrations.recorder import MigrationRecorder
