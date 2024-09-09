@@ -1,6 +1,7 @@
 import copy
 import inspect
 import warnings
+from collections import defaultdict
 from functools import partialmethod
 from itertools import chain
 
@@ -30,6 +31,7 @@ from django.db.models import NOT_PROVIDED, ExpressionWrapper, IntegerField, Max,
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.deletion import CASCADE, Collector
 from django.db.models.expressions import DatabaseDefault
+from django.db.models.fields.composite import CompositePrimaryKey
 from django.db.models.fields.related import (
     ForeignObjectRel,
     OneToOneField,
@@ -508,7 +510,12 @@ class Model(AltersData, metaclass=ModelBase):
         for field in fields_iter:
             is_related_object = False
             # Virtual field
-            if field.attname not in kwargs and field.column is None or field.generated:
+            if (
+                field.attname not in kwargs
+                and field.column is None
+                or field.generated
+                or isinstance(field, CompositePrimaryKey)
+            ):
                 continue
             if kwargs:
                 if isinstance(field.remote_field, ForeignObjectRel):
@@ -601,7 +608,7 @@ class Model(AltersData, metaclass=ModelBase):
         return my_pk == other.pk
 
     def __hash__(self):
-        if self.pk is None:
+        if not self._is_pk_set():
             raise TypeError("Model instances without primary key value are unhashable")
         return hash(self.pk)
 
@@ -661,6 +668,13 @@ class Model(AltersData, metaclass=ModelBase):
         return setattr(self, self._meta.pk.attname, value)
 
     pk = property(_get_pk_val, _set_pk_val)
+
+    def _is_pk_set(self, meta=None):
+        pk_val = self._get_pk_val(meta)
+        return not (
+            pk_val is None
+            or (isinstance(pk_val, tuple) and any(f is None for f in pk_val))
+        )
 
     def get_deferred_fields(self):
         """
@@ -1095,10 +1109,10 @@ class Model(AltersData, metaclass=ModelBase):
             ]
 
         pk_val = self._get_pk_val(meta)
-        if pk_val is None:
+        if not self._is_pk_set(meta):
             pk_val = meta.pk.get_pk_value_on_save(self)
             setattr(self, meta.pk.attname, pk_val)
-        pk_set = pk_val is not None
+        pk_set = self._is_pk_set(meta)
         if not pk_set and (force_update or update_fields):
             raise ValueError("Cannot force an update in save() with no primary key.")
         updated = False
@@ -1226,7 +1240,7 @@ class Model(AltersData, metaclass=ModelBase):
                 # database to raise an IntegrityError if applicable. If
                 # constraints aren't supported by the database, there's the
                 # unavoidable risk of data corruption.
-                if obj.pk is None:
+                if not obj._is_pk_set():
                     # Remove the object from a related instance cache.
                     if not field.remote_field.multiple:
                         field.remote_field.delete_cached_value(obj)
@@ -1254,14 +1268,14 @@ class Model(AltersData, metaclass=ModelBase):
                 and hasattr(field, "fk_field")
             ):
                 obj = field.get_cached_value(self, default=None)
-                if obj and obj.pk is None:
+                if obj and not obj._is_pk_set():
                     raise ValueError(
                         f"{operation_name}() prohibited to prevent data loss due to "
                         f"unsaved related object '{field.name}'."
                     )
 
     def delete(self, using=None, keep_parents=False):
-        if self.pk is None:
+        if not self._is_pk_set():
             raise ValueError(
                 "%s object can't be deleted because its %s attribute is set "
                 "to None." % (self._meta.object_name, self._meta.pk.attname)
@@ -1367,7 +1381,7 @@ class Model(AltersData, metaclass=ModelBase):
         return field_map
 
     def prepare_database_save(self, field):
-        if self.pk is None:
+        if not self._is_pk_set():
             raise ValueError(
                 "Unsaved model instance %r cannot be used in an ORM query." % self
             )
@@ -1451,6 +1465,11 @@ class Model(AltersData, metaclass=ModelBase):
                 name = f.name
                 if name in exclude:
                     continue
+                if isinstance(f, CompositePrimaryKey):
+                    names = tuple(field.name for field in f.fields)
+                    if exclude.isdisjoint(names):
+                        unique_checks.append((model_class, names))
+                    continue
                 if f.unique:
                     unique_checks.append((model_class, (name,)))
                 if f.unique_for_date and f.unique_for_date not in exclude:
@@ -1497,7 +1516,7 @@ class Model(AltersData, metaclass=ModelBase):
             # allows single model to have effectively multiple primary keys.
             # Refs #17615.
             model_class_pk = self._get_pk_val(model_class._meta)
-            if not self._state.adding and model_class_pk is not None:
+            if not self._state.adding and self._is_pk_set(model_class._meta):
                 qs = qs.exclude(pk=model_class_pk)
             if qs.exists():
                 if len(unique_check) == 1:
@@ -1532,7 +1551,7 @@ class Model(AltersData, metaclass=ModelBase):
             qs = model_class._default_manager.filter(**lookup_kwargs)
             # Exclude the current object from the query if we are editing an
             # instance (as opposed to creating a new one)
-            if not self._state.adding and self.pk is not None:
+            if not self._state.adding and self._is_pk_set():
                 qs = qs.exclude(pk=self.pk)
 
             if qs.exists():
@@ -1725,6 +1744,7 @@ class Model(AltersData, metaclass=ModelBase):
                 *cls._check_constraints(databases),
                 *cls._check_default_pk(),
                 *cls._check_db_table_comment(databases),
+                *cls._check_composite_pk(),
             ]
 
         return errors
@@ -1760,6 +1780,63 @@ class Model(AltersData, metaclass=ModelBase):
                 ),
             ]
         return []
+
+    @classmethod
+    def _check_composite_pk(cls):
+        errors = []
+        meta = cls._meta
+        pk = meta.pk
+
+        if not isinstance(pk, CompositePrimaryKey):
+            return errors
+
+        seen_columns = defaultdict(list)
+
+        for field_name in pk.field_names:
+            hint = None
+
+            try:
+                field = meta.get_field(field_name)
+            except FieldDoesNotExist:
+                field = None
+
+            if not field:
+                hint = f"{field_name!r} is not a valid field."
+            elif not field.column:
+                hint = f"{field_name!r} field has no column."
+            elif field.null:
+                hint = f"{field_name!r} field may not set 'null=True'."
+            elif field.generated:
+                hint = f"{field_name!r} field is a generated field."
+            else:
+                seen_columns[field.column].append(field_name)
+
+            if hint:
+                errors.append(
+                    checks.Error(
+                        f"{field_name!r} cannot be included in the composite primary "
+                        "key.",
+                        hint=hint,
+                        obj=cls,
+                        id="models.E042",
+                    )
+                )
+
+        for column, field_names in seen_columns.items():
+            if len(field_names) > 1:
+                field_name, *rest = field_names
+                duplicates = ", ".join(repr(field) for field in rest)
+                errors.append(
+                    checks.Error(
+                        f"{duplicates} cannot be included in the composite primary "
+                        "key.",
+                        hint=f"{duplicates} and {field_name!r} are the same fields.",
+                        obj=cls,
+                        id="models.E042",
+                    )
+                )
+
+        return errors
 
     @classmethod
     def _check_db_table_comment(cls, databases):

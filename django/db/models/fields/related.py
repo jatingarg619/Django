@@ -624,11 +624,21 @@ class ForeignObject(RelatedField):
         if not has_unique_constraint:
             foreign_fields = {f.name for f in self.foreign_related_fields}
             remote_opts = self.remote_field.model._meta
-            has_unique_constraint = any(
-                frozenset(ut) <= foreign_fields for ut in remote_opts.unique_together
-            ) or any(
-                frozenset(uc.fields) <= foreign_fields
-                for uc in remote_opts.total_unique_constraints
+            has_unique_constraint = (
+                any(
+                    frozenset(ut) <= foreign_fields
+                    for ut in remote_opts.unique_together
+                )
+                or any(
+                    frozenset(uc.fields) <= foreign_fields
+                    for uc in remote_opts.total_unique_constraints
+                )
+                # If the model defines a composite primary key and the foreign key
+                # refers to it, the target is unique.
+                or (
+                    frozenset(field.name for field in remote_opts.pk_fields)
+                    == foreign_fields
+                )
             )
 
         if not has_unique_constraint:
@@ -1969,7 +1979,7 @@ class ManyToManyField(RelatedField):
         pass
 
     def value_from_object(self, obj):
-        return [] if obj.pk is None else list(getattr(obj, self.attname).all())
+        return [] if not obj._is_pk_set() else list(getattr(obj, self.attname).all())
 
     def save_form_data(self, instance, data):
         getattr(instance, self.attname).set(data)
