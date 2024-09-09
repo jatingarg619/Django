@@ -255,9 +255,10 @@ Tests
   failures easier to read and enables :option:`test --pdb` to directly enter
   into the failing test method.
 
-* Fixtures (including data from migrations enabled with
-  :ref:`serialized_rollback=True <test-case-serialized-rollback>`) are now
-  available during the ``setUpClass()`` phase of a ``TransactionTestCase``.
+* Data loaded from :attr:`~django.test.TransactionTestCase.fixtures`, and
+  loaded from migrations enabled with :ref:`serialized_rollback=True
+  <test-case-serialized-rollback>`, are now available during
+  ``TransactionTestCase.setUpClass()``.
 
 URLs
 ~~~~
