@@ -2,10 +2,7 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import IS_POPUP_VAR
 from django.contrib.admin.utils import unquote
-from django.contrib.auth import (
-    get_user_model, 
-    update_session_auth_hash,
-)
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import (
     AdminPasswordChangeForm,
     AdminUserCreationForm,
