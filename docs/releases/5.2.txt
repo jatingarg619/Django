@@ -206,7 +206,7 @@ Migrations
 :mod:`django.db.migrations`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ``MigrationAutodetector`` now exposes `MigrationAutodetector.autodetector_class` for subclasses to override.
+* ``MigrationAutodetector`` now exposes ``MigrationAutodetector.autodetector_class`` for subclasses to override.
 
 Models
 ~~~~~~
